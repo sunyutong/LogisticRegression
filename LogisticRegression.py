@@ -13,8 +13,8 @@ class LogisticRegression:
 	# Define a constructor with 3 parameters
 	def __init__(self):
 
-		self.W_without_w0 = None
-		self.w0 = None
+		self.coef_ = None
+		self.intercept_ = None
 		self._W = None
 
 	# Implement sigmoid function
@@ -22,7 +22,7 @@ class LogisticRegression:
 		return 1. / (1. + np.exp(-t))
 
 
-	def fit(self, X_train, y_train, learning_rate = 0.01, momentum = 0.1 , n_iters=1e4):
+	def fit(self, X_train, y_train, learning_rate = 0.1, momentum = 0.1 , n_iters=1e4):
 
 		assert X_train.shape[0] == y_train.shape[0], \
 			"the size of X_train must be equal to the size of y_train"
@@ -31,15 +31,16 @@ class LogisticRegression:
 		def cost_function(W, X_b, y):
 
 			y_hat = self._sigmoid(X_b.dot(W))
+
 			try:
-				return - np.sum(y*np.log(y_hat) + (1-y)*np.log(1-y_hat))
+				return - np.sum(y*np.log(y_hat) + (1-y)*np.log(1-y_hat)) / len(y)
 			except:
 				return float('error')
 
 
 		# Calculate the gradient of loss function
 		def get_gradient(W, X_b, y):
-			return X_b.T.dot(self._sigmoid(X_b.dot(W)) - y)
+			return X_b.T.dot(self._sigmoid(X_b.dot(W)) - y) / len(y)
 
 
 		# Implement gradient descent with learning_rate and momentum parameter
@@ -47,17 +48,18 @@ class LogisticRegression:
 
 			W = initial_W
 			cur_iter = 0
-			v = 0
+			v = 1e-4
 			# W_history.append(initial_W)
 
 			while cur_iter < n_iters:
 
 				gradient = get_gradient(W, X_b, y)
 				last_W = W 
-				v = (-1) * learning_rate * gradient + momentum * v
-				W += v
+				v = learning_rate * gradient + 0.1 * v
+				W = W - v
+				# W = W - learning_rate * gradient
 				# W_history.append(W)
-				if (abs(cost_function(W, X_b, y) - cost_function(last_W, X_b, y))) < epsilon:
+				if (abs(cost_function(W, X_b, y) - cost_function(last_W, X_b, y)) < epsilon):
 					break
 				cur_iter += 1
 

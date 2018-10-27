@@ -37,8 +37,8 @@ class GradientDescentM:
 
 			gradient = self.dJ(self.W)
 			last_W = self.W
-			v = (-1) * learning_rate * gradient + momentum * v
-			self.W += v
+			v =  learning_rate * gradient + momentum * v
+			self.W -= v
 			self.W_history.append(self.W)
 
 			if(abs(self.J(self.W) - self.J(last_W))) < epsilon:
